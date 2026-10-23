@@ -27,8 +27,8 @@ by the services behind the gateway.
 
 The frontend is **one React application**. Business applications are modules
 under `src/apps/<app-id>/`, built and deployed together with the shell. There
-are no runtime microfrontends and no module federation at this stage
-([ADR-0001](docs/adr/0001-single-react-app-with-app-modules.md)).
+are no runtime microfrontends and no module federation. Modules never import
+from each other, so they can be split into separate bundles later if needed.
 
 Each module exports a manifest: application ID, name, version, entry route,
 required permissions and dependencies. The contract is in
