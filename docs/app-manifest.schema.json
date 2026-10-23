@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/RSOcc26/web/blob/main/docs/app-manifest.schema.json",
+  "title": "CompanyCentral application manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "name", "version", "entryRoute", "requiredPermissions", "dependencies"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+      "description": "Stable application ID, shared with the Access application registry."
+    },
+    "name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sl", "en"],
+      "properties": {
+        "sl": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z.-]+)?$"
+    },
+    "entryRoute": {
+      "type": "string",
+      "pattern": "^/apps/[a-z][a-z0-9-]*$"
+    },
+    "requiredPermissions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]*:[a-z][a-z0-9-.]*$"
+      }
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "applications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+              "version": { "type": "string", "description": "Semver range, for example ^1.0.0." }
+            }
+          }
+        },
+        "services": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(service-[a-z0-9-]+|gateway)$" }
+        }
+      }
+    },
+    "icon": { "type": "string" }
+  }
+}
