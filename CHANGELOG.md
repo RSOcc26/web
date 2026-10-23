@@ -15,4 +15,4 @@ and the project uses [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Renamed the project from CompanyHub to CompanyCentral.
-- The Hub shell no longer includes the mailbox and tasks; those services are deferred.
+- The Hub shell no longer includes the mailbox and tasks; those services are out of scope.
