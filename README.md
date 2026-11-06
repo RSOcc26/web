@@ -8,7 +8,9 @@ the *Cloud Computing Services* course (RSO 2026/27, FRI UL).
 See the [architecture](https://github.com/RSOcc26/.github/blob/main/docs/architecture.md) and the
 [RSOcc26 organization](https://github.com/RSOcc26) for the other repositories.
 
-> **Status:** scaffold — no implementation yet.
+> **Status:** first slice: sign-in with Keycloak and a signed-in page showing
+> the user's profile from `service-identity`. Company switcher and
+> application modules are not built yet.
 
 ## Responsibilities
 
@@ -52,17 +54,45 @@ Browser ──▶ Ingress ──┬── /       ──▶ web      (this repo:
 
 The build produces static files that an nginx container serves. The UI and
 the API share one domain through the Ingress, so no CORS configuration is
-needed and session cookies work as-is.
+needed. In development the Vite server proxies `/api` to the gateway
+(`GATEWAY_URL`, default `http://localhost:8080`) for the same effect.
+
+## Sign-in
+
+The browser signs in directly with Keycloak using the OIDC authorization code
+flow with PKCE ([ADR-0002](https://github.com/RSOcc26/.github/blob/main/docs/adr/0002-identity-provider.md)),
+through [`oidc-client-ts`](https://github.com/authts/oidc-client-ts). The `web`
+client is public (no secret). Signed-out users are sent straight to the
+sign-in page, which is Keycloak serving our own login theme (in the deploy
+repository, `compose/keycloak/themes/companycentral`), in the user's language
+(`ui_locales`). Passwords are entered only there; this app never sees them.
+The app's own login screen appears only if sign-in cannot start or fails.
+
+## User administration
+
+Platform admins (Keycloak realm role `platform-admin`) see **Users** in the
+navigation: `/admin/users` lists accounts, `/admin/users/{id}` edits names and
+email and deletes a user after typing their email to confirm. The rules
+(Keycloak sync, anonymization, retries) live in `service-identity`; see
+[ADR-0003](https://github.com/RSOcc26/.github/blob/main/docs/adr/0003-user-lifecycle.md).
+The production nginx must serve `index.html` for these paths (history
+routing); the Vite dev server already does. Tokens live in `sessionStorage`
+and are renewed with the refresh token; every API call sends the access token
+to the gateway, which replaces it with its own signed context. The redirect
+URI is `/auth/callback` and must be allowed on the Keycloak client.
 
 ## Configuration
 
-Runtime settings (for example the API base path) are injected when the
-container starts, so one image runs in every environment.
+Runtime settings are written to `/config.js` (`window.__APP_CONFIG__`) when
+the container starts, so one image runs in every environment.
+`public/config.js` holds the local development values.
 
 | Variable | Required | Description |
 |---|---|---|
 | `API_BASE_PATH` | no | Path of the gateway on the same origin (default `/api`) |
 | `DEFAULT_LOCALE` | no | `sl` or `en` (default `sl`) |
+| `OIDC_AUTHORITY` | yes | Keycloak realm URL as the browser reaches it |
+| `OIDC_CLIENT_ID` | no | Public OIDC client (default `web`) |
 
 See [`.env.example`](.env.example).
 
@@ -71,7 +101,16 @@ See [`.env.example`](.env.example).
 Prerequisites: Node.js 24 (see `.nvmrc`) and Docker. A running gateway is
 needed for anything beyond static screens.
 
-_Commands will be added with the first implementation._
+```
+npm install
+npm run dev     # http://localhost:5173, proxies /api to the gateway
+npm test        # unit tests (Vitest)
+npm run build   # static files in dist/
+```
+
+For signing in you need Keycloak (deploy Compose stack), the gateway and
+`service-identity` running. Create an account with "Register" on the Keycloak
+page.
 
 ## Project structure
 
