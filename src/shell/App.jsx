@@ -13,7 +13,7 @@ const userManager = createUserManager({ authority: config.oidcAuthority, clientI
 // Keycloak theme). LoginPage is shown only when that fails, so there is
 // never a second "sign in" step.
 const Shell = () => {
-  const { status, error, signIn } = useAuth();
+  const { status, error, signOutFailed, signIn } = useAuth();
   const { t, locale } = useI18n();
   const [redirectFailed, setRedirectFailed] = useState(false);
   const autoRedirect = status === 'signedOut' && !error && !redirectFailed;
@@ -28,7 +28,7 @@ const Shell = () => {
   if (status === 'loading' || autoRedirect) {
     return <p className="loading" role="status">{t(status === 'loading' ? 'auth.loading' : 'login.redirecting')}</p>;
   }
-  return status === 'signedIn' ? <SignedInShell /> : <LoginPage failed={redirectFailed} />;
+  return status === 'signedIn' ? <SignedInShell /> : <LoginPage failed={redirectFailed} signOutFailed={signOutFailed} />;
 };
 
 // Hub shell root

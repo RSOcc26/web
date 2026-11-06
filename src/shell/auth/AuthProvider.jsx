@@ -84,7 +84,7 @@ export const AuthProvider = ({ userManager, children }) => {
         // The provider could not be reached: the local session is gone anyway
         signingOut.current = false;
         await userManager.removeUser();
-        setState({ status: 'signedOut', user: null, error });
+        setState({ status: 'signedOut', user: null, error, signOutFailed: true });
       }
     },
     // The current access token, refreshed if expired; null when the session has ended

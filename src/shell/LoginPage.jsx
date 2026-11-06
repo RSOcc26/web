@@ -6,7 +6,7 @@ import { LocaleSwitch } from './LocaleSwitch.jsx';
 // Fallback shown only when sign-in could not start or complete (for example
 // the identity provider is unreachable). The normal sign-in page is the
 // CompanyCentral Keycloak theme; this app never sees a password.
-export const LoginPage = ({ failed: initiallyFailed = false }) => {
+export const LoginPage = ({ failed: initiallyFailed = false, signOutFailed = false }) => {
   const { t, locale } = useI18n();
   const { signIn } = useAuth();
   const [redirecting, setRedirecting] = useState(false);
@@ -29,7 +29,7 @@ export const LoginPage = ({ failed: initiallyFailed = false }) => {
       <section className="card login__card" aria-labelledby="login-title">
         <p className="brand">{t('app.name')}</p>
         <h1 id="login-title">{t('login.title')}</h1>
-        <p className="alert" role="alert">{t(failed ? 'login.unavailable' : 'login.error')}</p>
+        <p className="alert" role="alert">{t(failed ? 'login.unavailable' : signOutFailed ? 'login.signOutIncomplete' : 'login.error')}</p>
         <button type="button" className="button button--primary button--block" onClick={onRetry} disabled={redirecting}>
           {redirecting ? t('login.redirecting') : t('login.retry')}
         </button>
