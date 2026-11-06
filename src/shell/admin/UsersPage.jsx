@@ -50,7 +50,7 @@ export const UsersPage = () => {
       <div className="toolbar">
         <label className="field field--grow">
           <span className="field__label">{t('admin.users.search')}</span>
-          <input className="input" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin.users.searchPlaceholder')} />
+          <input className="input" type="search" maxLength={100} value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('admin.users.searchPlaceholder')} />
         </label>
         <label className="field">
           <span className="field__label">{t('admin.users.status')}</span>

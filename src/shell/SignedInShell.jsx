@@ -78,7 +78,7 @@ export const SignedInShell = () => {
     );
   } else if (pathname.startsWith('/admin') && !admin) page = <p className="alert" role="alert">{t('admin.forbidden')}</p>;
   else if (matchPath('/admin/users', pathname)) page = <UsersPage />;
-  else if (userParams) page = <UserPage id={userParams.id} />;
+  else if (userParams) page = <UserPage key={userParams.id} id={userParams.id} />;
   else page = <HomePage />;
 
   return (

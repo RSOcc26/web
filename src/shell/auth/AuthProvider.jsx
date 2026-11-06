@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ErrorResponse } from 'oidc-client-ts';
 import { CALLBACK_PATH, safeReturnPath } from './userManager.js';
 
 const AuthContext = createContext(null);
@@ -93,7 +94,8 @@ export const AuthProvider = ({ userManager, children }) => {
       if (!user.expired) return user.access_token;
       renewing.current ??= userManager.signinSilent()
         .then((renewed) => renewed?.access_token ?? null)
-        .catch(() => null)
+        // Only the provider refusing the refresh ends the session; a network error is retryable
+        .catch((err) => { if (err instanceof ErrorResponse) return null; throw err; })
         .finally(() => { renewing.current = null; });
       return renewing.current;
     },

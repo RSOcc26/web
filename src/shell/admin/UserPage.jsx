@@ -25,11 +25,14 @@ export const UserPage = ({ id }) => {
     setForm({ givenName: data.givenName ?? '', familyName: data.familyName ?? '', email: data.email ?? '' });
   };
 
+  // A malformed id (400) is as missing as an unknown one (404)
+  const load = (signal) => api(`/identity/v1/admin/users/${encodeURIComponent(id)}`, { signal })
+    .then(showUser)
+    .catch((err) => err.name !== 'AbortError' && setUser({ status: [400, 404].includes(err.status) ? 'missing' : 'error', data: null }));
+
   useEffect(() => {
     const controller = new AbortController();
-    api(`/identity/v1/admin/users/${encodeURIComponent(id)}`, { signal: controller.signal })
-      .then(showUser)
-      .catch((err) => err.name !== 'AbortError' && setUser({ status: err.status === 404 ? 'missing' : 'error', data: null }));
+    load(controller.signal);
     return () => controller.abort();
   }, [api, id]);
 
@@ -51,6 +54,11 @@ export const UserPage = ({ id }) => {
       setSave({ status: 'saved', error: null });
       if (isSelf) reloadMe();
     } catch (err) {
+      // Any other conflict means the user was deleted meanwhile: show the current state
+      if (err.status === 409 && !/email/i.test(err.problem?.detail ?? '')) {
+        setSave({ status: 'idle', error: null });
+        return load();
+      }
       const key = { 409: 'admin.user.emailTaken', 400: 'admin.user.invalid', 503: 'admin.user.unavailable' }[err.status] ?? 'admin.user.saveError';
       setSave({ status: 'idle', error: key });
     }
@@ -72,6 +80,7 @@ export const UserPage = ({ id }) => {
       <span className="field__label">{t(`admin.user.${name}`)}</span>
       <input
         className="input" type={type} required autoComplete={autoComplete} maxLength={name === 'email' ? 254 : 100}
+        readOnly={save.status === 'saving'}
         value={form[name]} onChange={(e) => { setForm({ ...form, [name]: e.target.value }); setSave({ status: 'idle', error: null }); }}
       />
     </label>
@@ -122,7 +131,8 @@ export const UserPage = ({ id }) => {
             )}
           </section>
 
-          <dialog ref={dialog} className="dialog" aria-labelledby="confirm-heading">
+          {/* The dialog stays open until a running delete has finished */}
+          <dialog ref={dialog} className="dialog" aria-labelledby="confirm-heading" onCancel={(e) => removal.status === 'deleting' && e.preventDefault()}>
             <h2 id="confirm-heading">{t('admin.user.confirmTitle')}</h2>
             <p>{t('admin.user.confirmText', { email: u.email })}</p>
             <label className="field">
@@ -131,7 +141,7 @@ export const UserPage = ({ id }) => {
             </label>
             {removal.error && <p className="alert" role="alert">{t(removal.error)}</p>}
             <div className="form__actions">
-              <button type="button" className="button" onClick={() => dialog.current?.close()}>{t('common.cancel')}</button>
+              <button type="button" className="button" disabled={removal.status === 'deleting'} onClick={() => dialog.current?.close()}>{t('common.cancel')}</button>
               <button
                 type="button" className="button button--danger" onClick={onDelete}
                 disabled={confirmText.trim().toLowerCase() !== u.email.toLowerCase() || removal.status === 'deleting'}

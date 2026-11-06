@@ -85,7 +85,9 @@ URI is `/auth/callback` and must be allowed on the Keycloak client.
 
 Runtime settings are written to `/config.js` (`window.__APP_CONFIG__`) when
 the container starts, so one image runs in every environment.
-`public/config.js` holds the local development values.
+`public/config.js` holds the local development values. The container image
+(Dockerfile, nginx config, start-up script) is not built yet; until then only
+`npm run dev` uses this configuration.
 
 | Variable | Required | Description |
 |---|---|---|
