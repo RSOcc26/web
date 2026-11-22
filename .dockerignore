@@ -7,3 +7,5 @@ test
 .env
 .env.*
 *.md
+dist
+.local

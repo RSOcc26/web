@@ -85,9 +85,8 @@ URI is `/auth/callback` and must be allowed on the Keycloak client.
 
 Runtime settings are written to `/config.js` (`window.__APP_CONFIG__`) when
 the container starts, so one image runs in every environment.
-`public/config.js` holds the local development values. The container image
-(Dockerfile, nginx config, start-up script) is not built yet; until then only
-`npm run dev` uses this configuration.
+`public/config.js` holds the local development values; in the container
+`nginx/40-runtime-config.sh` writes it at startup.
 
 | Variable | Required | Description |
 |---|---|---|
@@ -95,6 +94,7 @@ the container starts, so one image runs in every environment.
 | `DEFAULT_LOCALE` | no | `sl` or `en` (default `sl`) |
 | `OIDC_AUTHORITY` | yes | Keycloak realm URL as the browser reaches it |
 | `OIDC_CLIENT_ID` | no | Public OIDC client (default `web`) |
+| `GATEWAY_URL` | no | Container only: proxy `/api` to this gateway URL (local Compose). Unset in Kubernetes, where the Ingress routes `/api`; `/api` then answers `404` |
 
 See [`.env.example`](.env.example).
 
@@ -136,8 +136,11 @@ docs/
 
 ## Deployment
 
-Built as a container image and published to GitHub Container Registry.
-Kubernetes manifests and Helm charts live in the deployment repository.
+CI builds the image from the `Dockerfile` and pushes it to
+`ghcr.io/rsocc26/web` on every merge to `main`, tagged `sha-<commit>` and
+`main` (version tags add `X.Y.Z` and `X.Y`). The image runs as a non-root user
+with a read-only root filesystem. Kubernetes manifests and Helm charts live in
+the deployment repository.
 
 ## Contributing
 
