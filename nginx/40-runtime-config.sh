@@ -9,10 +9,10 @@ json() { printf '"%s"' "$(printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g')"; }
 
 {
   echo 'window.__APP_CONFIG__ = {'
-  if [ -n "${API_BASE_PATH:-}" ]; then echo "  apiBasePath: $(json "$API_BASE_PATH"),"; fi
-  if [ -n "${DEFAULT_LOCALE:-}" ]; then echo "  defaultLocale: $(json "$DEFAULT_LOCALE"),"; fi
-  if [ -n "${OIDC_AUTHORITY:-}" ]; then echo "  oidcAuthority: $(json "$OIDC_AUTHORITY"),"; fi
-  if [ -n "${OIDC_CLIENT_ID:-}" ]; then echo "  oidcClientId: $(json "$OIDC_CLIENT_ID"),"; fi
+  if [ -n "${API_BASE_PATH:-}" ]; then printf '  %s: %s,\n' apiBasePath "$(json "$API_BASE_PATH")"; fi
+  if [ -n "${DEFAULT_LOCALE:-}" ]; then printf '  %s: %s,\n' defaultLocale "$(json "$DEFAULT_LOCALE")"; fi
+  if [ -n "${OIDC_AUTHORITY:-}" ]; then printf '  %s: %s,\n' oidcAuthority "$(json "$OIDC_AUTHORITY")"; fi
+  if [ -n "${OIDC_CLIENT_ID:-}" ]; then printf '  %s: %s,\n' oidcClientId "$(json "$OIDC_CLIENT_ID")"; fi
   echo '};'
 } > /tmp/config.js
 

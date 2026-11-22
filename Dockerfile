@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 # Static build served by an unprivileged nginx on port 8080 (non-root, read-only friendly).
 
 FROM node:24-alpine AS build
