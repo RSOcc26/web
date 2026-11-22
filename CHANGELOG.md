@@ -26,6 +26,9 @@ and the project uses [Semantic Versioning](https://semver.org/).
   accepts (for example a deleted account) shows a "session ended" screen
   whose button signs out fully, so sign-in can never loop.
 - Error boundary: an unexpected error shows a message instead of a blank page.
+- Container image: static build on unprivileged nginx with SPA fallback, runtime
+  `/config.js` from the environment and an optional `/api` proxy (`GATEWAY_URL`);
+  published to `ghcr.io/rsocc26/web` by CI on merge to `main`.
 
 ### Fixed
 
